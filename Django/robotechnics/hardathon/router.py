@@ -1,10 +1,15 @@
 from django.shortcuts import get_object_or_404
-from rest_framework import routers, viewsets
 from hardathon.models import Hardathon, Project
-from hardathon.serializers import (HardathonSerializer, DetailProjectSerializer,
-                                   HardatonProjectsSerializer, HardatonPartnersSerializer)
-from hardathon.pagination import (HardathonPagination, HardatonProjectsPagination,
-                                  HardatonPartnersPagination)
+from hardathon.pagination import (HardathonPagination,
+                                  HardatonPartnersPagination,
+                                  HardatonProjectsPagination)
+from hardathon.serializers import (DetailProjectSerializer,
+                                   HardathonByIdSerializer,
+                                   HardathonSerializer,
+                                   HardatonPartnersSerializer,
+                                   HardatonProjectsSerializer)
+from rest_framework import routers, viewsets
+from rest_framework.response import Response
 
 
 class HardathonViewSet(viewsets.ModelViewSet):
@@ -18,6 +23,11 @@ class HardathonViewSet(viewsets.ModelViewSet):
     queryset = Hardathon.get_all_objects_by_id()
     serializer_class = HardathonSerializer
     pagination_class = HardathonPagination
+
+    def retrieve(self, request, pk=None):
+        hardathon = get_object_or_404(self.queryset, pk=pk)
+        serializer = HardathonByIdSerializer(hardathon)
+        return Response(serializer.data)
 
 
 class DetailProjectViewSet(viewsets.ModelViewSet):
@@ -36,7 +46,8 @@ class HardatonProjectsViewSet(viewsets.ModelViewSet):
     @brief Роутер для проектов хардатона
     @details Нужен для автоматической маршрутизации.
         Логика этого роутера отличается от логики остальных.
-        Пагинация, по сути, происходит не в классе-пагинаторе, а в функции retrieve.
+        Пагинация, по сути, происходит не в классе-пагинаторе,
+        а в функции retrieve.
         Сериализация тоже происходит в этой функции.
     @param queryset Список всех объектов из базы данных
     @param serializer_class Сериализатор
@@ -61,7 +72,8 @@ class HardatonPartnersViewSet(viewsets.ModelViewSet):
     @brief Роутер для партнёров хардатона
     @details Нужен для автоматической маршрутизации.
         Логика этого роутера отличается от логики остальных.
-        Пагинация, по сути, происходит не в классе-пагинаторе, а в функции retrieve.
+        Пагинация, по сути, происходит не в классе-пагинаторе,
+        а в функции retrieve.
         Сериализация тоже происходит в этой функции.
     @param queryset Список всех объектов из базы данных
     @param serializer_class Сериализатор
@@ -74,21 +86,22 @@ class HardatonPartnersViewSet(viewsets.ModelViewSet):
         hardaton = get_object_or_404(self.queryset, id=kwargs['pk'])
         paginator = HardatonPartnersPagination()
         paginator.page_size = 5
-        data = paginator.paginate_queryset(queryset=hardaton.partners.all(), request=request)
+        data = paginator.paginate_queryset(queryset=hardaton.partners.all(),
+                                           request=request)
         serializer = HardatonPartnersSerializer(data, many=True)
         data = serializer.data
         data = paginator.get_paginated_response(data)
         return data
 
 
-router = routers.DefaultRouter()
-router.register(r'', HardathonViewSet)
+router_hardathon = routers.DefaultRouter()
+router_hardathon.register(r'', HardathonViewSet)
 
-router2 = routers.DefaultRouter()
-router2.register(r'', DetailProjectViewSet)
+router_detail_project = routers.DefaultRouter()
+router_detail_project.register(r'', DetailProjectViewSet)
 
-router3 = routers.DefaultRouter()
-router3.register(r'', HardatonProjectsViewSet)
+router_hardathon_projects = routers.DefaultRouter()
+router_hardathon_projects.register(r'', HardatonProjectsViewSet)
 
-router4 = routers.DefaultRouter()
-router4.register(r'', HardatonPartnersViewSet)
+router_hardathon_partners = routers.DefaultRouter()
+router_hardathon_partners.register(r'', HardatonPartnersViewSet)

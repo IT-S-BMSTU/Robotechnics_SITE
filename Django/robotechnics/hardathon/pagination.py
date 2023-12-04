@@ -1,5 +1,4 @@
 from rest_framework import pagination
-from partners.models import Partner
 from rest_framework.response import Response
 from robotechnics.settings import BASE_URL
 
